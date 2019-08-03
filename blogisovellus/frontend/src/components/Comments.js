@@ -37,7 +37,6 @@ const Comment = ({ comment }) => {
 }
 
 const CommentsList = ({ blogComments }) => {
-  console.log(blogComments)
   if (blogComments !== undefined) {
     return (
       blogComments.map(comment =>

@@ -56,45 +56,47 @@ const App = () => {
 
   const handleVote = (id) => {
     const blogToUpdate = blogs.find(blog => blog.id === id)
-    let updatedBlog = blogToUpdate
-    const currentUser = user.username
-    const userToUpdate = users.find(u => u.username === user.username)
-    const usersBlogs = userToUpdate.blogs.map(blog => blog.id)
-    let updatedUser = userToUpdate
-    let newLikes = blogToUpdate.likes
-    let newFans = blogToUpdate.fans
-    let newLikedBlogs = blogToUpdate.likedBlogs
+    // let updatedBlog = blogToUpdate
+    // let currentUser = user.username
+    // const userToUpdate = users.find(u => u.username === user.username)
+    // const usersBlogs = userToUpdate.blogs.map(blog => blog.id)
+    // let updatedUser = userToUpdate
+    // let newLikes = blogToUpdate.likes
+    // let newFans = blogToUpdate.fans
+    // let newLikedBlogs = blogToUpdate.likedBlogs
     try {
-      if (blogToUpdate.fans.find(fan => fan === currentUser)) {
-        newLikes = blogToUpdate.likes - 1
-        newFans = blogToUpdate.fans.filter(f => f !== currentUser)
-        updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
-        newLikedBlogs = userToUpdate.likedBlogs.filter(blog => blog.id !== blogToUpdate.id)
+      if (blogToUpdate.fans.find(fan => fan === user.username)) {
+        decreaseVotes(id)
+        // newLikes = blogToUpdate.likes - 1
+        // newFans = blogToUpdate.fans.filter(f => f !== currentUser)
+        // updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
+        // newLikedBlogs = userToUpdate.likedBlogs.filter(blog => blog.id !== blogToUpdate.id)
       } else {
-        newLikes = blogToUpdate.likes + 1
-        newFans = blogToUpdate.fans.concat(currentUser)
-        updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
-        newLikedBlogs = userToUpdate.likedBlogs.concat(blogToUpdate)
+        increaseVotes(id)
+        // newLikes = blogToUpdate.likes + 1
+        // newFans = blogToUpdate.fans.concat(currentUser)
+        // updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
+        // newLikedBlogs = userToUpdate.likedBlogs.concat(blogToUpdate)
       }
     } catch (error) {
       console.log(error)
     }
-    try {
-      const likedBlogs = newLikedBlogs.map(blog => blog.id)
-      updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
-      blogService
-        .update(blogToUpdate.id, updatedBlog)
-        .then(returnedBlog => {
-          setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
-        })
-      userService
-        .update(userToUpdate.id, updatedUser)
-        .then(returnedUser => {
-          setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
-        })
-    } catch (exception) {
-      console.log('Ei onnistunut.', JSON.stringify(exception))
-    }
+    // try {
+    //   const likedBlogs = newLikedBlogs.map(blog => blog.id)
+    //   updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
+    //   blogService
+    //     .update(blogToUpdate.id, updatedBlog)
+    //     .then(returnedBlog => {
+    //       setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
+    //     })
+    //   userService
+    //     .update(userToUpdate.id, updatedUser)
+    //     .then(returnedUser => {
+    //       setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
+    //     })
+    // } catch (exception) {
+    //   console.log('Ei onnistunut.', JSON.stringify(exception))
+    // }
     blogService
       .getAll()
       .then(initialBlogs => {
@@ -106,6 +108,58 @@ const App = () => {
         console.log('users promise fulfilled')
         setUsers(response)
       })
+  }
+
+  const increaseVotes = (id) => {
+    const blogToUpdate = blogs.find(blog => blog.id === id)
+    const userToUpdate = users.find(u => u.username === user.username)
+    const usersBlogs = userToUpdate.blogs.map(blog => blog.id)
+    const newLikes = blogToUpdate.likes + 1
+    const newFans = blogToUpdate.fans.concat(user.username)
+    const updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
+    const newLikedBlogs = userToUpdate.likedBlogs.concat(blogToUpdate)
+    try {
+      const likedBlogs = newLikedBlogs.map(blog => blog.id)
+      const updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
+      blogService
+        .update(blogToUpdate.id, updatedBlog)
+        .then(returnedBlog => {
+          setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
+        })
+      userService
+        .update(userToUpdate.id, updatedUser)
+        .then(returnedUser => {
+          setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
+        })
+    } catch (exception) {
+      console.log('Tykkääminen ei onnistunut.', JSON.stringify(exception))
+    }
+  }
+
+  const decreaseVotes = (id) => {
+    const blogToUpdate = blogs.find(blog => blog.id === id)
+    const userToUpdate = users.find(u => u.username === user.username)
+    const usersBlogs = userToUpdate.blogs.map(blog => blog.id)
+    const newLikes = blogToUpdate.likes - 1
+    const newFans = blogToUpdate.fans.filter(f => f !== user.username)
+    const updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
+    const newLikedBlogs = userToUpdate.likedBlogs.filter(blog => blog.id !== blogToUpdate.id)
+    try {
+      const likedBlogs = newLikedBlogs.map(blog => blog.id)
+      const updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
+      blogService
+        .update(blogToUpdate.id, updatedBlog)
+        .then(returnedBlog => {
+          setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
+        })
+      userService
+        .update(userToUpdate.id, updatedUser)
+        .then(returnedUser => {
+          setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
+        })
+    } catch (exception) {
+      console.log('Tykkäyksen peruminen ei onnistunut.', JSON.stringify(exception))
+    }
   }
 
   const handleRemove = async (id) => {
