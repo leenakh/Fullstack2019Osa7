@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Blogs from './Blogs'
+import userService from '../services/users'
 
 const cellStyleFull = { width: 200 }
 const cellStyleShort = { width: 200, height: 20 }
@@ -15,12 +16,13 @@ background: aliceblue;
 `
 const BlogList = ({ style, user, blogs, headline, handleVote, handleRemove, username }) => {
   if (user !== undefined) {
-    const showBlogs = { display: blogs.length === 0 ? 'none' : '' }
+    const blogsToShow = blogs.filter(blog => blog !== null)
+    const showBlogs = { display: blogsToShow.length === 0 ? 'none' : '' }
     return (
       <div style={showBlogs}>
         <Frame>
           <h3>{headline}</h3>
-          <Blogs style={style} blogs={blogs} handleVote={handleVote} handleRemove={handleRemove} username={username} />
+          <Blogs style={style} blogs={blogsToShow} handleVote={handleVote} handleRemove={handleRemove} username={username} />
         </Frame>
       </div>
     )
@@ -58,12 +60,24 @@ export const User = ({ user, show }) => {
 }
 
 export const UserInfo = ({ user, show, handleVote, handleRemove, username }) => {
-  if (user !== undefined) {
+  const [thisUser, setThisUser] = useState(null)
+
+  useEffect(() => {
+    if (user !== undefined) {
+      userService.getOne(user.id)
+        .then(response => {
+          console.log('käyttäjä haettu')
+          setThisUser(response)
+        })
+    }
+  }, [user, handleVote])
+
+  if (thisUser !== undefined && thisUser !== null) {
     return (
       <>
-        <User user={user} show={show} />
-        <BlogList user={user} blogs={user.blogs} headline='Lisätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
-        <BlogList user={user} blogs={user.likedBlogs} headline='Tykätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
+        <User user={thisUser} show={show} />
+        <BlogList user={thisUser} blogs={thisUser.blogs} headline='Lisätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
+        <BlogList user={thisUser} blogs={thisUser.likedBlogs} headline='Tykätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
       </>
     )
   }

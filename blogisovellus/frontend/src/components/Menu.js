@@ -2,16 +2,15 @@ import React from 'react'
 import { BrowserRouter as Router, Route, Link, withRouter } from 'react-router-dom'
 import Users from './Users'
 import Blogs from './Blogs'
+import userService from '../services/users'
 import BlogFormWithoutHistory from './BlogForm'
 import Logout from './Logout'
 import { UserInfo } from './User'
 import { BlogInfo } from './Blog'
 
 const Menu = ({ user, users, blogs, username, handleVote, handleRemove, handleLogout, handleAddBlog }) => {
-  const userById = (id) =>
-    users.find(user => user.id === id)
-  const blogById = (id) =>
-    blogs.find(blog => blog.id === id)
+  const userById = (id) => users.find(user => user.id === id)
+  const blogById = (id) => blogs.find(blog => blog.id === id)
   const BlogForm = withRouter(BlogFormWithoutHistory)
   const style = { width: 800 }
   const linkStyle = { background: 'aliceblue', padding: 5, margin: 2 }

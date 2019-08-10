@@ -23,7 +23,7 @@ usersRouter.get('/', async (req, res, next) => {
 
 usersRouter.get('/:id', async (req, res, next) => {
     try {
-        const user = await User.findById(req.params.id)
+        const user = await User.findById(req.params.id).populate('blogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 }).populate('likedBlogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
         res.json(user)
     } catch (exception) {
         next(exception)

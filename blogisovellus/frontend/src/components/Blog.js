@@ -28,6 +28,7 @@ const Remove = ({ handleRemove, blog, username }) => {
   return null
 }
 
+
 export const Blog = ({ blog, handleVote, handleRemove, username }) => {
   return (
     <div className="table-frame">

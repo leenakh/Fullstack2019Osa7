@@ -2,7 +2,7 @@ import React from 'react'
 import { Blog } from './Blog'
 
 const Blogs = ({ blogs, username, handleVote, handleRemove }) => {
-  if (blogs !== undefined && username !== undefined) {
+  if (blogs !== undefined && blogs.length !== 0 && blogs !== null && username !== undefined) {
     const sortedBlogs =
       blogs.sort(function (a, b) {
         if (a.likes < b.likes) {
