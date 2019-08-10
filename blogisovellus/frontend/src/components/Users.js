@@ -1,7 +1,19 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { User } from './User'
+import userService from '../services/users'
 
-const Users = ({ users, show }) => {
+const Users = ({ show }) => {
+
+  const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    userService.getAll()
+      .then(response => {
+        console.log('käyttäjät haettu')
+        setUsers(response)
+      })
+  }, [])
+
   if (users !== undefined) {
     return (
       users.map(user =>
