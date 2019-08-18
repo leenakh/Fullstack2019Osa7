@@ -2,10 +2,12 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
-require ('../models/comment')
+require('../models/comment')
 
 blogsRouter.get('/', async (req, res) => {
-    const blogs = await Blog.find({}).populate('user', { username: 1, name: 1, blogs: 1, likedBlogs: 1 }).populate('comments', { content: 1 })
+    const blogs = await Blog.find({})
+        .populate('user', { username: 1, name: 1, blogs: 1, likedBlogs: 1 })
+        .populate('comments', { content: 1 })
     res.json(blogs.map(blog => blog.toJSON()))
 })
 
@@ -13,7 +15,10 @@ blogsRouter.get('/:id', async (req, res, next) => {
     try {
         const blog = await Blog.findById(req.params.id)
         if (blog) {
-            res.json(blog.toJSON())
+            const returnedBlog = await Blog.findById(blog._id)
+                .populate('user', { username: 1, name: 1, blogs: 1, likedBlogs: 1 })
+                .populate('comments', { content: 1 })
+            res.json(returnedBlog.toJSON())
         } else {
             res.status(404).end()
         }
@@ -58,7 +63,9 @@ blogsRouter.post('/', async (req, res, next) => {
             const savedBlog = await blog.save()
             user.blogs = user.blogs.concat(savedBlog._id)
             await User.findByIdAndUpdate(user._id, user, { new: true })
-            res.json(savedBlog.toJSON())
+            const returnedBlog = await Blog.findById(savedBlog._id)
+                .populate('user', { username: 1, name: 1, blogs: 1, likedBlogs: 1 })
+            res.json(returnedBlog.toJSON())
         }
     } catch (exception) {
         next(exception)
@@ -99,6 +106,7 @@ blogsRouter.put('/:id', async (req, res, next) => {
     }
     try {
         const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, blog, { new: true })
+            .populate('user', { username: 1, name: 1, blogs: 1, likedBlogs: 1 })
         res.json(updatedBlog.toJSON())
     } catch (exception) {
         next(exception)

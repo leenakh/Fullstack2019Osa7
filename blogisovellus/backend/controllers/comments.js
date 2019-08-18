@@ -2,7 +2,6 @@
 const commentsRouter = require('express').Router()
 const Comment = require('../models/comment')
 const jwt = require('jsonwebtoken')
-const Blog = require('../models/blog')
 const User = require('../models/user')
 const moment = require('moment')
 
@@ -16,7 +15,11 @@ const getTokenFrom = req => {
 
 commentsRouter.get('/:id/comments', async (req, res, next) => {
     try {
-        const comments = await Comment.find({ blog: req.params.id }).sort('-time').limit(10).populate('blog', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 }).populate('user', { name: 1, username: 1 })
+        const comments = await Comment.find({ blog: req.params.id })
+            .sort('-time')
+            .limit(10)
+            .populate('blog', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
+            .populate('user', { name: 1, username: 1 })
         res.json(comments.map(comment => comment.toJSON()))
     } catch (exception) {
         next(exception)
@@ -31,11 +34,7 @@ commentsRouter.post('/:id/comments', async (req, res, next) => {
         if (!token || !decodedToken.id) {
             return res.status(401).json({ error: 'token missing or invalid' })
         }
-        console.log('token', decodedToken)
         const user = await User.findById(decodedToken.id)
-        console.log('user', user)
-        const blog = await Blog.findById(req.params.id)
-        console.log(blog)
         const comment = new Comment({
             content: body.content,
             blog: req.params.id,

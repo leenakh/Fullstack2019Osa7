@@ -34,8 +34,6 @@ const Menu = ({ user, setUser, username, setLoginVisible, setErrorMessage, setNo
       })
   }, [])
 
-
-
   const handleVote = (id) => {
     const blogToUpdate = blogs.find(blog => blog.id === id)
     try {
@@ -50,71 +48,64 @@ const Menu = ({ user, setUser, username, setLoginVisible, setErrorMessage, setNo
   }
 
   const increaseVotes = (id) => {
-    const findUser = users.find(u => u.username === user.username)
-    userService.getOne(findUser.id).then(result => {
-      const userToUpdate = result
-      const blogToUpdate = blogs.find(blog => blog.id === id)
+    const userToUpdate = users.find(u => u.username === user.username)
+    const blogToUpdate = blogs.find(blog => blog.id === id)
+    const newLikes = blogToUpdate.likes + 1
+    const newFans = blogToUpdate.fans.concat(user.username)
+    const updatedBlog = { ...blogToUpdate, user: blogToUpdate.user.id, likes: newLikes, fans: newFans }
+    const newLikedBlogs = userToUpdate.likedBlogs.concat(blogToUpdate)
+    try {
+      const likedBlogs = newLikedBlogs.map(blog => blog.id)
       const usersBlogs = userToUpdate.blogs.map(blog => blog.id)
-      const newLikes = blogToUpdate.likes + 1
-      const newFans = blogToUpdate.fans.concat(user.username)
-      const updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
-      const newLikedBlogs = userToUpdate.likedBlogs.concat(blogToUpdate)
-      try {
-        const likedBlogs = newLikedBlogs.map(blog => blog.id)
-        const updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
-        blogService
-          .update(blogToUpdate.id, updatedBlog)
-          .then(returnedBlog => {
-            setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
-          })
-        userService
-          .update(userToUpdate.id, updatedUser)
-          .then(returnedUser => {
-            setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
-          })
-      } catch (exception) {
-        console.log('Tykkääminen ei onnistunut.', JSON.stringify(exception))
-      }
-    })
+      const updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
+      blogService
+        .update(blogToUpdate.id, updatedBlog)
+        .then(returnedBlog => {
+          setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
+        })
+      userService
+        .update(userToUpdate.id, updatedUser)
+        .then(returnedUser => {
+          setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
+        })
+    } catch (exception) {
+      console.log('Tykkääminen ei onnistunut.', JSON.stringify(exception))
+    }
   }
 
   const decreaseVotes = (id) => {
-    const findUser = users.find(u => u.username === user.username)
-    userService.getOne(findUser.id).then(result => {
-      const userToUpdate = result
-      const blogToUpdate = blogs.find(blog => blog.id === id)
-      const usersBlogs = userToUpdate.blogs.map(blog => blog.id)
-      const newLikes = blogToUpdate.likes - 1
-      const newFans = blogToUpdate.fans.filter(f => f !== user.username)
-      const updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
-      const newLikedBlogs = userToUpdate.likedBlogs.filter(blog => blog.id !== blogToUpdate.id)
-      try {
-        let likedBlogs = newLikedBlogs.map(blog => blog.id)
-        if (userToUpdate.likedBlogs.length === 1) {
-          likedBlogs = []
-        }
-        const updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
-        blogService
-          .update(blogToUpdate.id, updatedBlog)
-          .then(returnedBlog => {
-            setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
-          })
-        userService
-          .update(userToUpdate.id, updatedUser)
-          .then(returnedUser => {
-            setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
-          })
-      } catch (exception) {
-        console.log('Tykkäyksen peruminen ei onnistunut.', JSON.stringify(exception))
+    const userToUpdate = users.find(u => u.username === user.username)
+    const blogToUpdate = blogs.find(blog => blog.id === id)
+    const usersBlogs = userToUpdate.blogs.map(blog => blog.id)
+    const newLikes = blogToUpdate.likes - 1
+    const newFans = blogToUpdate.fans.filter(f => f !== user.username)
+    const updatedBlog = { ...blogToUpdate, likes: newLikes, fans: newFans }
+    const newLikedBlogs = userToUpdate.likedBlogs.filter(blog => blog.id !== blogToUpdate.id)
+    try {
+      let likedBlogs = newLikedBlogs.map(blog => blog.id)
+      if (userToUpdate.likedBlogs.length === 1) {
+        likedBlogs = []
       }
-    })
+      const updatedUser = { ...userToUpdate, blogs: usersBlogs, likedBlogs: likedBlogs }
+      blogService
+        .update(blogToUpdate.id, updatedBlog)
+        .then(returnedBlog => {
+          setBlogs(blogs.map(blog => blog.id !== blogToUpdate.id ? blog : returnedBlog))
+        })
+      userService
+        .update(userToUpdate.id, updatedUser)
+        .then(returnedUser => {
+          setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
+        })
+    } catch (exception) {
+      console.log('Tykkäyksen peruminen ei onnistunut.', JSON.stringify(exception))
+    }
   }
 
   const handleRemove = async (id) => {
-    const findUser = users.find(u => u.username === user.username)
-    const userToUpdate = await userService.getOne(findUser.id)
+    const userToUpdate = users.find(u => u.username === user.username)
     const blogInQuestion = await blogs.find(blog => blog.id === id)
-    const newBlogs = userToUpdate.blogs.filter(blog => blog.id !== blogInQuestion.id).map(blog => blog.id)
+    const newBlogs = userToUpdate.blogs.filter(blog => blog.id !== id).map(blog => blog.id)
     const newLikedBlogs = userToUpdate.likedBlogs.map(blog => blog.id)
     const updatedUser = { ...userToUpdate, blogs: newBlogs, likedBlogs: newLikedBlogs }
     if (window.confirm(`Haluatko varmasti poistaa kohteen ${blogInQuestion.title}?`)) {
@@ -122,7 +113,7 @@ const Menu = ({ user, setUser, username, setLoginVisible, setErrorMessage, setNo
         await blogService.remove(id)
         setBlogs(blogs.filter(blog => blog.id !== id))
         const returnedUser = await userService.update(userToUpdate.id, updatedUser)
-        setUsers(users.map(u => u.id !== userToUpdate ? u : returnedUser))
+        setUsers(users.map(u => u.id !== userToUpdate.id ? u : returnedUser))
       } catch (exception) {
         console.log('Poistaminen ei onnistunut.')
         await setErrorMessage('Poistaminen ei onnistunut.')
@@ -134,14 +125,16 @@ const Menu = ({ user, setUser, username, setLoginVisible, setErrorMessage, setNo
   const handleAddBlog = async (blog) => {
     try {
       const response = await blogService.create(blog)
+      const updatedUser = await userService.getOne(response.user.id)
       setBlogs(blogs.concat(response))
+      setUsers(users.map(u => u.id !== updatedUser.id ? u : updatedUser))
+      await setNotification(`Luetteloon lisättiin sivu ${blog.title} (tekijä: ${blog.author}).`)
+      setTimeout(() => { setNotification(null) }, 5000)
     } catch (exception) {
       console.log('Uuden blogin luominen ei onnistunut.')
       await setErrorMessage('Uuden sivun lisääminen luetteloon ei onnistunut.')
       setTimeout(() => { setErrorMessage(null) }, 5000)
     }
-    await setNotification(`Luetteloon lisättiin sivu ${blog.title} (tekijä: ${blog.author}).`)
-    setTimeout(() => { setNotification(null) }, 5000)
   }
 
   const handleLogout = async () => {

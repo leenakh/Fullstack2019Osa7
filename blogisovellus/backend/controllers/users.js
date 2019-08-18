@@ -14,7 +14,9 @@ const getTokenFrom = req => {
 
 usersRouter.get('/', async (req, res, next) => {
     try {
-        const users = await User.find({}).populate('blogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 }).populate('likedBlogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
+        const users = await User.find({})
+            .populate('blogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
+            .populate('likedBlogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
         res.json(users.map(user => user.toJSON()))
     } catch (exception) {
         next(exception)
@@ -23,7 +25,9 @@ usersRouter.get('/', async (req, res, next) => {
 
 usersRouter.get('/:id', async (req, res, next) => {
     try {
-        const user = await User.findById(req.params.id).populate('blogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 }).populate('likedBlogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
+        const user = await User.findById(req.params.id)
+            .populate('blogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
+            .populate('likedBlogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
         res.json(user)
     } catch (exception) {
         next(exception)
@@ -62,6 +66,8 @@ usersRouter.put('/:id', async (req, res, next) => {
     }
     try {
         const updatedUser = await User.findByIdAndUpdate(req.params.id, user, { new: true })
+            .populate('blogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
+            .populate('likedBlogs', { title: 1, author: 1, url: 1, likes: 1, fans: 1, username: 1 })
         res.json(updatedUser.toJSON())
     } catch (exception) {
         next(JSON.stringify(req.params))

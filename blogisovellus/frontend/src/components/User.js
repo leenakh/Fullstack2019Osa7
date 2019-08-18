@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Blogs from './Blogs'
-import userService from '../services/users'
 
 const cellStyleFull = { width: 200 }
 const cellStyleShort = { width: 200, height: 20 }
@@ -60,24 +59,12 @@ export const User = ({ user, show }) => {
 }
 
 export const UserInfo = ({ user, show, handleVote, handleRemove, username }) => {
-  const [thisUser, setThisUser] = useState(null)
-
-  useEffect(() => {
-    if (user !== undefined) {
-      userService.getOne(user.id)
-        .then(response => {
-          console.log('käyttäjä haettu')
-          setThisUser(response)
-        })
-    }
-  }, [user, handleVote])
-
-  if (thisUser !== undefined && thisUser !== null) {
+  if (user !== undefined && user !== null) {
     return (
       <>
-        <User user={thisUser} show={show} />
-        <BlogList user={thisUser} blogs={thisUser.blogs} headline='Lisätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
-        <BlogList user={thisUser} blogs={thisUser.likedBlogs} headline='Tykätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
+        <User user={user} show={show} />
+        <BlogList user={user} blogs={user.blogs} headline='Lisätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
+        <BlogList user={user} blogs={user.likedBlogs} headline='Tykätyt sivut' handleVote={handleVote} handleRemove={handleRemove} username={username} />
       </>
     )
   }
